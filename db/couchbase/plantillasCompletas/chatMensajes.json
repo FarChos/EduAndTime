@@ -1,0 +1,17 @@
+{
+  "tipo":"chatMensajes",
+  "estaActivo":null,
+  "version":1,
+  "configMensajes":[
+    {
+      "mensajesTemporales":null
+    }
+  ],
+  "mensajes":[
+    {
+      "nombreUsuario":"",
+      "mensaje":"",
+      "fechaYHora":null
+    }
+  ]
+}

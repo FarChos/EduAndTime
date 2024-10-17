@@ -1,0 +1,17 @@
+{
+  "tipo":"chatGrupo",
+  "estaActivo":null,
+  "version":0,
+  "idChat":0,
+  "participantes":[
+    {
+      "idUsuario":0,
+      "rol":""
+    } 
+  ],
+  "configChat":[
+    {
+      "integrantesMax":0   
+    }
+  ]
+}

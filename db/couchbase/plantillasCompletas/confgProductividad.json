@@ -1,0 +1,10 @@
+{
+  "tipo":"configProductividad",
+  "estaActivo":null,
+  "version":0,
+  "idUsuario":0,
+  "nivelUsuario":"",
+  "configCalendario":"",
+  "configBloqueos":"",
+  "configMetas":""
+}

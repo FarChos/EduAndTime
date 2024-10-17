@@ -1,0 +1,13 @@
+{
+  "tipo":"usuario",
+  "estaActivo":null,
+  "version":0,
+  "idUsuario":0,
+  "docCalificados":[{
+    "idDoc":"",
+    "calificacion":""
+    }],
+  "docOriginados":[{
+    "idDoc":""
+  }]
+}

@@ -1,0 +1,16 @@
+{
+  "tipo":"documento",
+  "idDocumento":0,
+  "estaActivo":null,
+  "version":0,
+  "calificacion":"",
+  "noDescargas":"",
+  "etiquetas":[{
+    "etiqueta":""
+  }],
+  "comentarios":[{
+    "idUsuario":"",
+    "nombreUsuario":"",
+    "comentario":""
+  }]
+}
