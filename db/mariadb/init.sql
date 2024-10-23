@@ -1,19 +1,23 @@
-CREATE DATABASE IF NOT EXISTS EduAndTime;
+CREATE DATABASE IF NOT EXISTS EduAndTime CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+
+CREATE USER IF NOT EXISTS 'admin' IDENTIFIED BY 'tearsthemoon';
+GRANT ALL PRIVILEGES ON EduAndTime. * TO 'admin'@'%';
+FLUSH PRIVILEGES;
 
 USE EduAndTime;
 
-CREATE TABLE usuarios (
-  idUsuario INT AUTO_INCREMENT NOT NULL,
+CREATE TABLE IF NOT EXISTS usuarios (
+  idUsuario INT AUTO_INCREMENT,
   nombre VARCHAR(255) UNIQUE NOT NULL,
   correo VARCHAR(255) UNIQUE NOT NULL,
   contrasena VARCHAR(255) NOT NULL,
-  DirecImgPerfil VARCHAR(255) NOT NULL, 
+  direcImgPerfil TEXT NOT NULL, 
   fechaOrigen DATE NOT NULL,
     PRIMARY KEY (idUsuario)
 );
 
-CREATE TABLE documentos (
-  idDoc INT AUTO_INCREMENT NOT NULL,
+CREATE TABLE IF NOT EXISTS documentos (
+  idDoc INT AUTO_INCREMENT,
   titulo VARCHAR(255) NOT NULL,
   autor VARCHAR(255) NOT NULL,
   categoria ENUM('sociedad', 'geografía', 'tecnologia', 'ciencia', 'economía', 'bienestar', 'política', 'arte', 'filosofia', 'exotica') NOT NULL,
@@ -26,8 +30,8 @@ CREATE TABLE documentos (
     FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuario)
 );
 
-CREATE TABLE chat (
-  idChat INT AUTO_INCREMENT NOT NULL,
+CREATE TABLE IF NOT EXISTS chat (
+  idChat INT AUTO_INCREMENT,
   nombreChat VARCHAR(255) NOT NULL,
   direcIcono VARCHAR(255) NOT NULL,
   direcFondo VARCHAR(255) NOT NULL,
@@ -39,17 +43,17 @@ CREATE TABLE chat (
     PRIMARY KEY (idChat)
 );
 
-CREATE INDEX inx_nombreChat
+CREATE INDEX IF NOT EXISTS inx_nombreChat
 ON chat(nombreChat);
 
-CREATE INDEX inx_titulo
+CREATE INDEX IF NOT EXISTS inx_titulo
 ON documentos (titulo);
-CREATE INDEX inx_autor
+CREATE INDEX IF NOT EXISTS inx_autor
 ON documentos (autor);
-CREATE INDEX inx_categoria
+CREATE INDEX IF NOT EXISTS inx_categoria
 ON documentos (categoria);
-CREATE INDEX inx_formato
+CREATE INDEX IF NOT EXISTS inx_formato
 ON documentos (formato);
 
-CREATE UNIQUE INDEX idx_correo
+CREATE UNIQUE INDEX IF NOT EXISTS idx_correo
 ON usuarios (correo);

@@ -1,0 +1,28 @@
+services:
+  mariadb:
+    container_name: mariadb
+    image: mariadb:latest
+    environment:
+      MARIADB_ROOT_PASSWORD: tearsthemoon
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db/mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql 
+
+  couchbase:
+    image: couchbase:latest
+    container_name: couchbase
+    network_mode: bridge  # Asegura que el contenedor use el modo bridge
+    ports:
+      - "8091:8091"  # Interfaz de administración
+      - "8092:8092"  # Servicios de vistas
+      - "8093:8093"  # Puerto de consultas N1QL
+      - "8094:8094"  # Full Text Search
+      - "11210:11210"  # Bucket de datos
+    volumes:
+      #- ./db/couchbase/data:/opt/couchbase/var 
+      - ./db/couchbase/colecciones/init.sh:/init.sh
+      - ./db/couchbase/colecciones/index.sh:/index.sh
+    restart: unless-stopped  
+    
+
