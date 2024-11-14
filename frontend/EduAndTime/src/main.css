@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .clip-diagonal {
+    clip-path: polygon(0 0, 100% 0, 100% 65%, 0% 95%);
+  }
+  .clip-complete {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+  }
+}
+
+/* src/assets/fonts.css */
+@font-face {
+  font-family: 'Gabriela';
+  src: url('./fonts/Gabriela-Regular.ttf') format('truetype'); /* Asegúrate que el formato sea correcto */
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'AbhayaLibre-Regular';
+  src: url('./fonts/AbhayaLibre-Regular.ttf') format('truetype'); /* Asegúrate que el archivo y formato coincidan */
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'AbhayaLibre-Bold';
+  src: url('./fonts/AbhayaLibre-Bold.ttf') format('truetype'); /* Mismo formato para esta fuente */
+  font-weight: bold; /* Cambié el peso para que sea 'bold' */
+  font-style: normal;
+}

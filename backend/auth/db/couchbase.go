@@ -22,6 +22,7 @@ func InitCouchbase(connStr, username, password string) {
 	if _, err := CouchbaseCluster.Ping(nil); err != nil {
 		log.Fatalf("Error al hacer ping a Couchbase: %v", err)
 	}
+	log.Println("Conexión a Couchbase establecida con éxito")
 }
 
 func CloseCouchbase() {

@@ -1,0 +1,53 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Recurso {
+  id: Int
+  titulo: String!
+  autor: String!
+  categoria: String!
+  idUsuario: Int!
+  formato: String!
+  descripcion: String!
+  direccionRec: String!
+}
+
+type Usuario {
+  Nombre: String!
+  Correo: String!
+  ImgPerf: String
+}
+
+type Token{
+  Token: String
+  Usuario: Usuario
+  Exito: Boolean!
+  Expira: Int
+}
+
+input inputRecurso {
+  titulo: String!
+  autor: String!
+  categoria: String!
+  idUsuario: Int!
+  formato: String!
+  descripcion: String!
+  direccionRec: String!
+}
+input inputToken{
+  Token: String
+  Usuario: Usuario
+  Exito: Boolean!
+  Expira: Int
+}
+
+type Query {
+  todos: [Todo!]!
+}
+
+
+
+type Mutation {
+  createTodo(input: NewTodo!): Todo!
+}

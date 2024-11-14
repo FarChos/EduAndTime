@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
   nombre VARCHAR(255) UNIQUE NOT NULL,
   correo VARCHAR(255) UNIQUE NOT NULL,
   contrasena VARCHAR(255) NOT NULL,
-  direcImgPerfil TEXT NOT NULL, 
+  direcImgPerfil TEXT, 
   fechaOrigen DATE NOT NULL,
     PRIMARY KEY (idUsuario)
 );
@@ -22,15 +22,16 @@ CREATE TABLE IF NOT EXISTS documentos (
   autor VARCHAR(255) NOT NULL,
   categoria ENUM('sociedad', 'geografía', 'tecnologia', 'ciencia', 'economía', 'bienestar', 'política', 'arte', 'filosofia', 'exotica') NOT NULL,
   idUsuario INT NOT NULL,
-  formato ENUM('PDF', 'EPUB', 'MOBI', 'TXT') NOT NULL,
+  formato ENUM('pdf', 'epub', 'mobi', 'txt', 'azw', 'azw3', 'fb2', 'djvu', 'docx', 'odt') NOT NULL,
   descripción TEXT NOT NULL,
+
   fechaOrigen DATE NOT NULL,
   DirecDoc VARCHAR(255) NOT NULL,
     PRIMARY KEY (idDoc),
     FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuario)
 );
 
-CREATE TABLE IF NOT EXISTS chat (
+CREATE TABLE IF NOT EXISTS chats (
   idChat INT AUTO_INCREMENT,
   nombreChat VARCHAR(255) NOT NULL,
   direcIcono VARCHAR(255) NOT NULL,
@@ -44,7 +45,7 @@ CREATE TABLE IF NOT EXISTS chat (
 );
 
 CREATE INDEX IF NOT EXISTS inx_nombreChat
-ON chat(nombreChat);
+ON chats(nombreChat);
 
 CREATE INDEX IF NOT EXISTS inx_titulo
 ON documentos (titulo);

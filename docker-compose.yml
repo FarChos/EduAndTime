@@ -8,21 +8,70 @@ services:
       - "3306:3306"
     volumes:
       - ./db/mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql 
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - redEAT
 
   couchbase:
+    user: root  
     image: couchbase:latest
     container_name: couchbase
-    network_mode: bridge  # Asegura que el contenedor use el modo bridge
     ports:
-      - "8091:8091"  # Interfaz de administración
-      - "8092:8092"  # Servicios de vistas
-      - "8093:8093"  # Puerto de consultas N1QL
-      - "8094:8094"  # Full Text Search
-      - "11210:11210"  # Bucket de datos
+      - "8091:8091"
+      - "8092:8092"
+      - "8093:8093"  
+      - "8094:8094"  
+      - "11210:11210"  
     volumes:
-      #- ./db/couchbase/data:/opt/couchbase/var 
       - ./db/couchbase/colecciones/init.sh:/init.sh
       - ./db/couchbase/colecciones/index.sh:/index.sh
-    restart: unless-stopped  
-    
+      - ./db/couchbase/colecciones/entrypointNew.sh:/entrypointNew.sh
+      - couchbase_data:/opt/couchbase/var
+    environment:
+      - COUCHBASE_ADMINISTRATOR_USERNAME=administrador
+      - COUCHBASE_ADMINISTRATOR_PASSWORD=tearsthemoon
+    entrypoint: ["/bin/bash","/entrypointNew.sh"]
+    command: ["couchbase-server"]
+    networks:
+      - redEAT
 
+  autentificacion:
+    build:
+      context: ./backend/auth  
+      dockerfile: Dockerfile
+    container_name: autentificacion
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/auth:/app
+    depends_on:
+      - mariadb
+      - couchbase
+    networks:
+      - redEAT
+
+  #frontea
+  
+  #  build:
+  #    context: ./frontend/EduAndTime
+  #    dockerfile: Dockerfile
+  #  container_name: frontEAT
+  #  ports:
+      #- "80:80"
+  #  depends_on:
+  #    - mariadb
+  #    - couchbase
+  #    - autentificacion
+  #  networks:
+  #    - redEAT
+
+volumes:
+  couchbase_data: # Este es el volumen para almacenar datos persistentes de Couchbase
+    driver: local
+  mariadb_data: # Volumen persistente para MariaDB
+    driver: local
+
+networks:
+  redEAT:
+    driver: bridge

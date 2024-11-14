@@ -23,11 +23,6 @@ for i in {1..10}; do
 done
 
 echo "Couchbase Server y N1QL están listos, iniciando creación de los índices..."
-curl -u administrador:tearsthemoon -X POST http://localhost:8093/query/service \
--H "Content-Type: application/json" \
--d '{"statement": "CREATE PRIMARY INDEX ON `eduandtime`;"}'
-
-
 
 # Crear índices
 curl -u "$COUCHBASE_ADMIN_USERNAME:$COUCHBASE_ADMIN_PASSWORD" \

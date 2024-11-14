@@ -17,8 +17,9 @@ func InitMariaDB(dsn string) {
 	}
 
 	if err = MariaDB.Ping(); err != nil {
-		log.Fatalf("Error al hacer ping a la base de datos: %v", err)
+		log.Fatalf("Error al hacer ping a mariadb %v", err)
 	}
+	log.Println("Conexión a mariadb establecida con éxito")
 }
 
 func CloseMariaDB() {
