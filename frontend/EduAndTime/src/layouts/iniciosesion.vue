@@ -16,6 +16,7 @@ const correo = ref('');
 const contrasena = ref('');
 
 async function iniciarSecion() {
+  console.log('Iniciar sesión ejecutado');
   try {
     const response = await authInstance.get('/query', {
       params: {
@@ -35,32 +36,37 @@ async function iniciarSecion() {
       `
       },
     });
-    console.log(response.data)
-    const exito = response.data.data.autentificarUsuario.Exito;
+    console.log(response.data);
+    const autentificarUsuario = response.data.data.autentificarUsuario;
+    const exito = autentificarUsuario.Exito;
 
-    if (exito){
+    if (exito) {
       console.log('Usuario registrado:', response.data);
-      const token = response.data.data.autentificarUsuario.Token;
-      localStorage.setItem('authTokenEAT', token);
-      router.push({ name: 'home' });
-    }else {
-      toast.info('Ups, revisa los campos, algo salio mal')
-      console.log(response)
-    }
 
+      // Guardar Token y datos del usuario en localStorage
+      const { Token, Usuario } = autentificarUsuario;
+      localStorage.setItem('authTokenEAT', Token); // Token
+      localStorage.setItem('userDataEAT', JSON.stringify(Usuario)); // Otros datos del usuario
+
+      // Redireccionar al home
+      router.push({ name: 'menu' });
+    } else {
+      toast.info('Ups, revisa los campos, algo salió mal');
+      console.log(response);
+    }
   } catch (error) {
-    toast.error('Error al iniciar sesion')
-    console.error('Error al iniciar sesion:', error);
-    console.log()
+    toast.error('Error al iniciar sesión');
+    console.error('Error al iniciar sesión:', error);
   }
 }
+
 </script>
 
 <template>
   <div class="w-full h-full bg-azulOscuroEAT md:flex md:flex-row font-gabriela">
 
     <img src="../img/inicio/RectangleLibros.png" alt="" class="absolute z-0 w-full clip-diagonal md:clip-complete md:static md:w-1/2">
-
+    <img class="" alt="">
     <div class="flex relative z-10 flex-col gap-6 justify-end items-center w-full h-full md:gap-20">
 
       <TituloEAT Text="Inicio de sesión"/>
@@ -69,7 +75,6 @@ async function iniciarSecion() {
       <InputTexto v-model="contrasena" placeholder="Tu contraseña" type="password"/>
 
       <BotonContrasteRosa label="Iniciar sesión" @click="iniciarSecion"/>
-      
       <div class="flex flex-row gap-2 pl-20 mb-20 text-white md:mb-40 md:pl-60 md:text-xl">
         <p class="font-abhayaRegular">¿No tienes cuenta?</p>
         <router-link to="/registro" class="font-abhayaBold">Registrate</router-link>

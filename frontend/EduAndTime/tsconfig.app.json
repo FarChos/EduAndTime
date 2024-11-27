@@ -13,6 +13,8 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "preserve",
+    "jsxFactory": "h", // Método que usa Vue para crear JSX
+    "jsxFragmentFactory": "Fragment", // Fragmentos en JSX
 
     /* Linting */
     "strict": true,

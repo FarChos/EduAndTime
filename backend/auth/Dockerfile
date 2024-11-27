@@ -2,7 +2,7 @@
 FROM opensuse/tumbleweed:latest AS builder
 
 # Instalar dependencias necesarias
-RUN zypper refresh && zypper install -y go git
+RUN zypper refresh && zypper install -y go git && zypper clean
 
 # Establecer el directorio de trabajo
 WORKDIR /app
@@ -16,21 +16,15 @@ RUN go mod download
 # Copiar el código fuente
 COPY . .
 
-# Establecer la arquitectura
-ENV GOOS=linux
-ENV GOARCH=amd64
+# Configurar la arquitectura y compilar la aplicación
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o EduAndTime .
 
-# Compilar la aplicación
-RUN go build -o EduAndTime .
-
-# Cambiar permisos para el binario
-RUN chmod +x /app/EduAndTime
 
 # Etapa 2: Crear la imagen final
-FROM opensuse/tumbleweed:latest
+FROM alpine:latest
 
 # Instalar certificados para HTTPS
-RUN zypper refresh && zypper install -y ca-certificates file
+RUN apk add --no-cache ca-certificates libc6-compat
 
 # Copiar el binario desde la etapa de construcción
 COPY --from=builder /app/EduAndTime /EduAndTime
@@ -38,11 +32,9 @@ COPY --from=builder /app/EduAndTime /EduAndTime
 # Dar permisos de ejecución al binario en la etapa final
 RUN chmod +x /EduAndTime
 
-
+# Exponer el puerto que usa la aplicación
+EXPOSE 8080
 
 # Establecer el comando por defecto
-CMD ["./EduAndTime"]
-
-# Exponer el puerto que usa la aplicación
-#EXPOSE 8080
+ENTRYPOINT ["/EduAndTime"]
 

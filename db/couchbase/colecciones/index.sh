@@ -24,11 +24,17 @@ done
 
 echo "Couchbase Server y N1QL están listos, iniciando creación de los índices..."
 
-# Crear índices
+#! Crear índices para los documentos
 curl -u "$COUCHBASE_ADMIN_USERNAME:$COUCHBASE_ADMIN_PASSWORD" \
      -X POST http://localhost:8093/query/service \
-     -d "statement=CREATE INDEX \`idx_idDocumento\` ON \`$COUCHBASE_BUCKET\`.\`documentos\`.\`documento\`(idDocumento)"
+     -d "statement=CREATE INDEX \`idx_Doc_id\` ON \`$COUCHBASE_BUCKET\`.\`documentos\`.\`documento\`(META().id)"
 
+curl -u "$COUCHBASE_ADMIN_USERNAME:$COUCHBASE_ADMIN_PASSWORD" \
+     -X POST http://localhost:8093/query/service \
+     -d "statement=CREATE INDEX \`idx_Etiquetas\` ON \`$COUCHBASE_BUCKET\`.\`documentos\`.\`documento\`(DISTINCT ARRAY tag FOR tag IN etiquetas ENDs)"
+
+
+#! Crear índices para el chat
 curl -u "$COUCHBASE_ADMIN_USERNAME:$COUCHBASE_ADMIN_PASSWORD" \
      -X POST http://127.0.0.1:8093/query/service \
      -d "statement=CREATE INDEX \`idx_idChatGrupo\` ON \`$COUCHBASE_BUCKET\`.\`chats\`.\`chatGrupo\`(idChat)"

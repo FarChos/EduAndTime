@@ -51,6 +51,22 @@ services:
     networks:
       - redEAT
 
+  libreria:
+    build:
+      context: ./backend/library 
+      dockerfile: Dockerfile
+    container_name: libreria
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./backend/library:/app
+    depends_on:
+      - mariadb
+      - couchbase
+    networks:
+      - redEAT
+
   #frontea
   
   #  build:

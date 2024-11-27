@@ -2,7 +2,7 @@
 export default {
   content: [
     './index.html',
-    './src/**/*.{vue,js,ts,jsx,tsx}'
+    './src/**/*.{html,js,vue,jsx,tsx}'
   ],
   
   theme: {
@@ -14,13 +14,18 @@ export default {
       },
       colors: {
         transparent: 'transparent',
-        azulOscuroEAT: '#1c2833',
+        azulProfundo: '#1c2830',
+        azulOscuroEAT: '#2C3E50',
+        azulOscuroMedioEAT: '#1c2832',
+        azulAunMasOscuroEAT: '#24313E',
         azulClaroEAT: '#11538a',
+        azulGisaseoEAT: '#85929E',
         verdeOscuroEAT: '#0b5345',
         moradoClaro: '#d600f0',
         moradoOscuroEAT: '#8e44ad',
         verdeClaroEAT: '#2ecc71',
-        grisEAT: '#aeb6bf'
+        grisEAT: '#D9E1E3',
+        grisClaroEAT: '#ECF0F1'
       },
     },
   },

@@ -2,25 +2,172 @@
 
 package model
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type Mutation struct {
 }
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type ParametrosBusqueda struct {
+	Titulo    *string    `json:"titulo,omitempty"`
+	Autor     *string    `json:"autor,omitempty"`
+	Categoria *Categoria `json:"categoria,omitempty"`
+	Formato   *Formato   `json:"formato,omitempty"`
+	Etiquetas []*string  `json:"etiquetas,omitempty"`
 }
 
 type Query struct {
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User User   `json:"user"`
+type Recurso struct {
+	ID           int       `json:"id"`
+	Titulo       string    `json:"titulo"`
+	Autor        string    `json:"autor"`
+	Categoria    Categoria `json:"categoria"`
+	IDUsuario    int       `json:"idUsuario"`
+	Formato      Formato   `json:"formato"`
+	Descripcion  string    `json:"descripcion"`
+	DireccionRec string    `json:"direccionRec"`
+	FechaOrigen  string    `json:"fechaOrigen"`
+	Etiquetas    []*string `json:"etiquetas,omitempty"`
+	Calificacion *float64  `json:"calificacion,omitempty"`
+	NumDescargas *int      `json:"numDescargas,omitempty"`
 }
 
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type RecursoInput struct {
+	Titulo       string    `json:"titulo"`
+	Autor        string    `json:"autor"`
+	Categoria    Categoria `json:"categoria"`
+	IDUsuario    int       `json:"idUsuario"`
+	Formato      Formato   `json:"formato"`
+	Descripcion  string    `json:"descripcion"`
+	DireccionRec string    `json:"direccionRec"`
+	Etiquetas    []*string `json:"etiquetas,omitempty"`
+}
+
+type RecursoMuestra struct {
+	ID           int       `json:"id"`
+	Titulo       string    `json:"titulo"`
+	Autor        string    `json:"autor"`
+	Categoria    Categoria `json:"categoria"`
+	Formato      Formato   `json:"formato"`
+	Etiquetas    []*string `json:"etiquetas,omitempty"`
+	Calificacion *float64  `json:"calificacion,omitempty"`
+}
+
+type Categoria string
+
+const (
+	CategoriaSociedad   Categoria = "sociedad"
+	CategoriaGeografia  Categoria = "geografia"
+	CategoriaTecnologia Categoria = "tecnologia"
+	CategoriaCiencia    Categoria = "ciencia"
+	CategoriaEconomia   Categoria = "economia"
+	CategoriaBienestar  Categoria = "bienestar"
+	CategoriaPolitica   Categoria = "politica"
+	CategoriaArte       Categoria = "arte"
+	CategoriaFilosofia  Categoria = "filosofia"
+	CategoriaExotica    Categoria = "exotica"
+)
+
+var AllCategoria = []Categoria{
+	CategoriaSociedad,
+	CategoriaGeografia,
+	CategoriaTecnologia,
+	CategoriaCiencia,
+	CategoriaEconomia,
+	CategoriaBienestar,
+	CategoriaPolitica,
+	CategoriaArte,
+	CategoriaFilosofia,
+	CategoriaExotica,
+}
+
+func (e Categoria) IsValid() bool {
+	switch e {
+	case CategoriaSociedad, CategoriaGeografia, CategoriaTecnologia, CategoriaCiencia, CategoriaEconomia, CategoriaBienestar, CategoriaPolitica, CategoriaArte, CategoriaFilosofia, CategoriaExotica:
+		return true
+	}
+	return false
+}
+
+func (e Categoria) String() string {
+	return string(e)
+}
+
+func (e *Categoria) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Categoria(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Categoria", str)
+	}
+	return nil
+}
+
+func (e Categoria) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type Formato string
+
+const (
+	FormatoPDF  Formato = "pdf"
+	FormatoEpub Formato = "epub"
+	FormatoMobi Formato = "mobi"
+	FormatoTxt  Formato = "txt"
+	FormatoAzw  Formato = "azw"
+	FormatoAzw3 Formato = "azw3"
+	FormatoFb2  Formato = "fb2"
+	FormatoDjvu Formato = "djvu"
+	FormatoDocx Formato = "docx"
+	FormatoOdt  Formato = "odt"
+)
+
+var AllFormato = []Formato{
+	FormatoPDF,
+	FormatoEpub,
+	FormatoMobi,
+	FormatoTxt,
+	FormatoAzw,
+	FormatoAzw3,
+	FormatoFb2,
+	FormatoDjvu,
+	FormatoDocx,
+	FormatoOdt,
+}
+
+func (e Formato) IsValid() bool {
+	switch e {
+	case FormatoPDF, FormatoEpub, FormatoMobi, FormatoTxt, FormatoAzw, FormatoAzw3, FormatoFb2, FormatoDjvu, FormatoDocx, FormatoOdt:
+		return true
+	}
+	return false
+}
+
+func (e Formato) String() string {
+	return string(e)
+}
+
+func (e *Formato) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Formato(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Formato", str)
+	}
+	return nil
+}
+
+func (e Formato) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

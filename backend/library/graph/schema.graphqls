@@ -1,53 +1,86 @@
-# GraphQL schema example
-#
-# https://gqlgen.com/getting-started/
+# Enums para valores específicos
+enum Formato {
+  pdf
+  epub
+  mobi
+  txt
+  azw
+  azw3
+  fb2
+  djvu
+  docx
+  odt
+}
+
+
+enum Categoria {
+  sociedad
+  geografia
+  tecnologia
+  ciencia
+  economia
+  bienestar
+  politica
+  arte
+  filosofia
+  exotica
+}
 
 type Recurso {
-  id: Int
+  id: Int!
   titulo: String!
   autor: String!
-  categoria: String!
+  categoria: Categoria!
   idUsuario: Int!
-  formato: String!
+  formato: Formato!
   descripcion: String!
   direccionRec: String!
+  fechaOrigen: String!
+  etiquetas: [String]
+  calificacion: Float
+  numDescargas: Int
 }
-
-type Usuario {
-  Nombre: String!
-  Correo: String!
-  ImgPerf: String
-}
-
-type Token{
-  Token: String
-  Usuario: Usuario
-  Exito: Boolean!
-  Expira: Int
-}
-
-input inputRecurso {
+type RecursoMuestra{
+  id: Int!
   titulo: String!
   autor: String!
-  categoria: String!
-  idUsuario: Int!
-  formato: String!
-  descripcion: String!
-  direccionRec: String!
-}
-input inputToken{
-  Token: String
-  Usuario: Usuario
-  Exito: Boolean!
-  Expira: Int
+  categoria: Categoria!
+  formato: Formato!
+  etiquetas: [String]
+  calificacion: Float 
 }
 
+# Inputs para mutaciones
+input RecursoInput {
+  titulo: String!
+  autor: String!
+  categoria: Categoria!
+  idUsuario: Int!
+  formato: Formato!
+  descripcion: String!
+  direccionRec: String!
+  etiquetas: [String]
+}
+
+input ParametrosBusqueda {
+  titulo: String
+  autor: String
+  categoria: Categoria
+  formato: Formato
+  etiquetas: [String]
+}
+
+# Consultas y Mutaciones
 type Query {
-  todos: [Todo!]!
+  buscarRecursos(input: ParametrosBusqueda!): [RecursoMuestra]
+  tomarRecurso(id: Int!): Recurso!
+  ultimosRecursos: [RecursoMuestra]
+  recursosAleatorios: [RecursoMuestra]
 }
-
-
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  actualizarNumDescargas(id: Int!): Boolean!
+  calificarRecurso(id: Int!, calificacion: Float!): Boolean!
+  subirRecurso(input: RecursoInput!): Boolean!
+  eliminarRecurso(id: Int!): Boolean!
 }
