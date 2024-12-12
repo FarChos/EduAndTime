@@ -1,28 +1,65 @@
 # GraphQL schema example
 #
 # https://gqlgen.com/getting-started/
-scalar Long
+
+scalar Upload
 
 type Usuario {
+  Id: Int!
   Nombre: String!
   Correo: String!
-  ImgPerf: String
+  nombreImagen: String
 }
-type TokenAuth{
+
+type UsuarioXRecursos {
+  idesFavoritos: [Int]
+  idesMisRecursos: [Int]
+  recursosCalificados: [recursoCalificado]
+}
+
+type TokenAuth {
   Token: String
   Usuario: Usuario
   Exito: Boolean!
-  Expira: Int
+}
+
+type recursoCalificado {
+  id: Int!
+  calificacion: Float!
+}
+
+type Resultado {
+  Exito: Boolean!
+  Mensaje: String
+}
+
+input UsuarioInput {
+  Nombre: String
+  Imagen: Upload
+  Correo: String!
+  Contrasena: String!
+}
+
+input UsuarioXRecursoInput {
+  ideFavorito: Int
+  ideMiRecurso: Int
+  recursoCalificado: recursoCalificadoInput
+}
+
+input recursoCalificadoInput {
+  idCalificado: Int!
+  calificacion: Float!
 }
 
 type Query {
-  autentificarUsuario(correo: String!, contrasena: String!): TokenAuth!
+  autentificarUsuario(input: UsuarioInput!): TokenAuth!
+  tomarUsuarioXRecursos(id: Int!): UsuarioXRecursos!
 }
 
-
 type Mutation {
-  crearUsuario(nombre:String!, correo:String!, imgPerf: String, contrasena:String!): Boolean! 
-  actualizarUsuario(correo: String!, nombre:String!, contrasena:String!): Boolean! 
-  eliminarUsuario(correo: String!): Boolean!
-
+  actualizarUsuarioXRecursos(id: Int!, input: UsuarioXRecursoInput!): Resultado!
+  eliminarUsuarioXRecurso(id: Int!, input: UsuarioXRecursoInput!): Resultado!
+  crearUsuario(input: UsuarioInput!): Resultado!
+  actualizarUsuario(input: UsuarioInput!): Resultado!
+  eliminarUsuario(input: UsuarioInput!): Resultado!
 }

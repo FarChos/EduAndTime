@@ -25,7 +25,8 @@ export default {
         moradoOscuroEAT: '#8e44ad',
         verdeClaroEAT: '#2ecc71',
         grisEAT: '#D9E1E3',
-        grisClaroEAT: '#ECF0F1'
+        grisClaroEAT: '#ECF0F1',
+        rojoEAT: '#800000'
       },
     },
   },

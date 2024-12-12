@@ -21,6 +21,11 @@ model:
   package: model
 
 # Where should the resolver implementations go?
+resolver:
+  layout: single-file
+  dir: graph
+  package: graph
+  filename: graph/resolvers.go
 #resolver:
  # layout: single-file
  # dir: graph
@@ -84,6 +89,8 @@ return_pointers_in_unmarshalinput: false
 # modelgen, the others will be allowed when binding to fields. Configure them to
 # your liking
 models:
+  Upload:
+      model: github.com/99designs/gqlgen/graphql.Upload
   ID:
     model:
       - github.com/99designs/gqlgen/graphql.ID

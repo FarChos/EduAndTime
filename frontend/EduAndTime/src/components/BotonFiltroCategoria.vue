@@ -4,7 +4,7 @@ import { defineProps, defineEmits } from 'vue';
 // Definir las propiedades esperadas
 const props = defineProps({
   botonFocus: {
-    type: String as () => string | null,
+    type: String,
     required: false,
   },
   nombre: {

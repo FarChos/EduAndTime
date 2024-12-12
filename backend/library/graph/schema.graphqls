@@ -1,4 +1,5 @@
 # Enums para valores específicos
+scalar Upload
 enum Formato {
   pdf
   epub
@@ -14,6 +15,7 @@ enum Formato {
 
 
 enum Categoria {
+  general
   sociedad
   geografia
   tecnologia
@@ -27,60 +29,65 @@ enum Categoria {
 }
 
 type Recurso {
-  id: Int!
-  titulo: String!
-  autor: String!
-  categoria: Categoria!
-  idUsuario: Int!
-  formato: Formato!
-  descripcion: String!
-  direccionRec: String!
-  fechaOrigen: String!
-  etiquetas: [String]
-  calificacion: Float
-  numDescargas: Int
+  Id: Int!
+  Titulo: String!
+  Autor: String!
+  Categoria: Categoria!
+  IdUsuario: Int!
+  Formato: Formato!
+  Descripcion: String!
+  Archivo: String!
+  FechaOrigen: String!
+  Etiquetas: [String]
+  Calificacion: Float
+  NumDescargas: Int
 }
 type RecursoMuestra{
-  id: Int!
-  titulo: String!
-  autor: String!
-  categoria: Categoria!
-  formato: Formato!
-  etiquetas: [String]
-  calificacion: Float 
+  Id: Int!
+  Titulo: String!
+  Autor: String!
+  Categoria: Categoria!
+  Formato: Formato!
+  Archivo: String!
+  Etiquetas: [String]
+  Calificacion: Float 
+}
+type Resultado {
+  Exito: Boolean!
+  Mensaje: String
 }
 
 # Inputs para mutaciones
 input RecursoInput {
-  titulo: String!
-  autor: String!
-  categoria: Categoria!
-  idUsuario: Int!
-  formato: Formato!
-  descripcion: String!
-  direccionRec: String!
-  etiquetas: [String]
+  Titulo: String!
+  Autor: String!
+  Categoria: Categoria!
+  IdUsuario: Int!
+  Formato: Formato!
+  Descripcion: String!
+  Recurso: Upload!
+  Etiquetas: [String]
 }
 
 input ParametrosBusqueda {
-  titulo: String
-  autor: String
-  categoria: Categoria
-  formato: Formato
-  etiquetas: [String]
+  Titulo: String
+  Autor: String
+  Categoria: Categoria
+  Formato: Formato
+  Etiquetas: [String]
+  Cantidad: Int
 }
 
 # Consultas y Mutaciones
 type Query {
   buscarRecursos(input: ParametrosBusqueda!): [RecursoMuestra]
+  tomarRecursos(ides: [Int]): [RecursoMuestra]
   tomarRecurso(id: Int!): Recurso!
-  ultimosRecursos: [RecursoMuestra]
-  recursosAleatorios: [RecursoMuestra]
-}
+  }
 
 type Mutation {
-  actualizarNumDescargas(id: Int!): Boolean!
-  calificarRecurso(id: Int!, calificacion: Float!): Boolean!
-  subirRecurso(input: RecursoInput!): Boolean!
-  eliminarRecurso(id: Int!): Boolean!
+  actualizarNumDescargas(id: Int!): Resultado!
+  calificarRecurso(id: Int!, calificacion: Float!): Resultado!
+  subirRecurso(input: RecursoInput!): Resultado!
+  eliminarRecurso(id: Int!): Resultado!
 }

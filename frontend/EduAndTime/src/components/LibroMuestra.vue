@@ -8,16 +8,18 @@ import GustoAltoBajo from '../img/iconosLibro/GustoBajo.png';
 
 
 
+
 // Referencia para el contenedor donde se renderizará el libro
 const containerRef = ref<HTMLDivElement | null>(null);
 
 // Desestructura las propiedades
-const { epubUrl, titulo, autor, categoria, formato, etiquetas, calificacion } = defineProps<{
-  epubUrl: string;
+const {id, titulo, autor, categoria, formato, epubUrl, etiquetas, calificacion } = defineProps<{
+  id: number;
   titulo: string;
   autor: string;
   categoria: string;
   formato: string;
+  epubUrl: string;
   etiquetas: string[]; // Array de strings
   calificacion: number; // Número (entero o flotante)
 }>();
@@ -64,15 +66,16 @@ const renderEpub = async () => {
 };
 
 
-// Renderiza el libro al montar el componente
-onMounted(renderEpub);
+const emit = defineEmits(['click']);
+
 const handleClick = () => {
-  
+  emit('click', id); // Emitimos el id al componente padre
 };
+onMounted(renderEpub);
 </script>
 
 <template>
-  <div class="flex pt-2.5 w-11/12 h-auto bg-white rounded-md border-2 border-azulAunMasOscuroEAT md:w-3/12" @click="handleClick">
+  <div class="flex pt-2.5 w-11/12 h-auto bg-white rounded-md border-2 cursor-pointer border-azulAunMasOscuroEAT md:w-auto" @click="handleClick()">
     <div class="h-40" ref="containerRef"></div>
     <div class="flex flex-col justify-center w-full">
       <h2 class="font-bold text-azulAunMasOscuroEAT text-md">{{ titulo }}</h2>

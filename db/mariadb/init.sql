@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
   nombre VARCHAR(255) UNIQUE NOT NULL,
   correo VARCHAR(255) UNIQUE NOT NULL,
   contrasena VARCHAR(255) NOT NULL,
-  direcImgPerfil TEXT, 
+  nombreImagen VARCHAR(255) NOT NULL,
   fechaOrigen VARCHAR(255) NOT NULL,  -- Corregido con longitud
   PRIMARY KEY (idUsuario)
 );
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS documentos (
   descripcion TEXT NOT NULL,
 
   fechaOrigen VARCHAR(255) NOT NULL,
-  DirecDoc VARCHAR(255) NOT NULL,
+  nombreArchivo VARCHAR(255) NOT NULL,
     PRIMARY KEY (idDoc),
     FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuario)
 );

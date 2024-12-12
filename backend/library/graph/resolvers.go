@@ -4,51 +4,60 @@ package graph
 
 import (
 	"context"
+	"libreria/controller"
 	"libreria/graph/model"
-	"libreria/services"
 )
 
 type Resolver struct{}
 
 // ActualizarNumDescargas is the resolver for the actualizarNumDescargas field.
-func (r *mutationResolver) ActualizarNumDescargas(ctx context.Context, id int) (bool, error) {
-	seActualizo, err := services.ActualizarNumDescargas(id)
+func (r *mutationResolver) ActualizarNumDescargas(ctx context.Context, id int) (model.Resultado, error) {
+	resultado, err := controller.ActualizarNumDescargas(id)
 	if err != nil {
-		return false, err
+		return resultado, err
 	}
-	return seActualizo, nil
+	return resultado, nil
 }
 
 // CalificarRecurso is the resolver for the calificarRecurso field.
-func (r *mutationResolver) CalificarRecurso(ctx context.Context, id int, calificacion float64) (bool, error) {
-	seCalifico, err := services.CalificarRecurso(id, float32(calificacion))
+func (r *mutationResolver) CalificarRecurso(ctx context.Context, id int, calificacion float64) (model.Resultado, error) {
+	resultado, err := controller.CalificarRecurso(id, calificacion)
 	if err != nil {
-		return false, err
+		return resultado, err
 	}
-	return seCalifico, nil
+	return resultado, nil
 }
 
 // SubirRecurso is the resolver for the subirRecurso field.
-func (r *mutationResolver) SubirRecurso(ctx context.Context, input model.RecursoInput) (bool, error) {
-	seSubio, err := services.CrearRecurso(input)
+func (r *mutationResolver) SubirRecurso(ctx context.Context, input model.RecursoInput) (model.Resultado, error) {
+	resultado, err := controller.SubirRecurso(input)
 	if err != nil {
-		return false, err
+		return resultado, err
 	}
-	return seSubio, nil
+	return resultado, nil
 }
 
 // EliminarRecurso is the resolver for the eliminarRecurso field.
-func (r *mutationResolver) EliminarRecurso(ctx context.Context, id int) (bool, error) {
-	seElimino, err := services.EliminarRecurso(id)
+func (r *mutationResolver) EliminarRecurso(ctx context.Context, id int) (model.Resultado, error) {
+	resultado, err := controller.EliminarRecurso(id)
 	if err != nil {
-		return false, err
+		return resultado, err
 	}
-	return seElimino, nil
+	return resultado, nil
 }
 
 // BuscarRecursos is the resolver for the BuscarRecursos field.
 func (r *queryResolver) BuscarRecursos(ctx context.Context, input model.ParametrosBusqueda) ([]*model.RecursoMuestra, error) {
-	recursos, err := services.BuscarRecursos(input)
+	recursos, err := controller.BuscarRecursos(input)
+	if err != nil {
+		return nil, err
+	}
+	return recursos, nil
+}
+
+// TomarRecursos is the resolver for the tomarRecursos field.
+func (r *queryResolver) TomarRecursos(ctx context.Context, ides []*int) ([]*model.RecursoMuestra, error) {
+	recursos, err := controller.TomarRecursos(ides)
 	if err != nil {
 		return nil, err
 	}
@@ -57,29 +66,11 @@ func (r *queryResolver) BuscarRecursos(ctx context.Context, input model.Parametr
 
 // TomarRecurso is the resolver for the tomarRecurso field.
 func (r *queryResolver) TomarRecurso(ctx context.Context, id int) (model.Recurso, error) {
-	exito, err := services.TomarRecurso(id)
+	recurso, err := controller.TomarRecurso(id)
 	if err != nil {
-		return exito, err
+		return recurso, err
 	}
-	return exito, nil
-}
-
-// UltimosRecursos is the resolver for the ultimosRecursos field.
-func (r *queryResolver) UltimosRecursos(ctx context.Context) ([]*model.RecursoMuestra, error) {
-	recursosUltimos, err := services.UltimosRecursos()
-	if err != nil {
-		return nil, err
-	}
-	return recursosUltimos, nil
-}
-
-// RecursosAleatorios is the resolver for the recursosAleatorios field.
-func (r *queryResolver) RecursosAleatorios(ctx context.Context) ([]*model.RecursoMuestra, error) {
-	recursosAleatorios, err := services.RecursosAleatorios()
-	if err != nil {
-		return nil, err
-	}
-	return recursosAleatorios, nil
+	return recurso, nil
 }
 
 // Mutation returns MutationResolver implementation.
@@ -99,7 +90,11 @@ type queryResolver struct{ *Resolver }
 //  - You have helper methods in this file. Move them out to keep these resolver files clean.
 /*
 	type Resolver struct{}
-func (r *queryResolver) RecomendarRecursos(ctx context.Context) ([]*model.RecursoMuestra, error) {
-	panic("not implemented")
+func (r *queryResolver) BuscarRecursosIniciales(ctx context.Context, input model.ParametrosBusqueda) ([]*model.RecursoMuestra, error) {
+	recursos, err := controller.BuscarRecursosIniciales(input)
+	if err != nil {
+		return nil, err
+	}
+	return recursos, nil
 }
 */

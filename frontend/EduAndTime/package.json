@@ -21,10 +21,16 @@
     "vue-tsc": "^2.1.6"
   },
   "dependencies": {
+    "@apollo/client": "^3.11.10",
+    "@vue/apollo-composable": "^4.2.1",
     "@xmldom/xmldom": "^0.9.5",
     "axios": "^1.7.7",
     "epubjs": "^0.3.93",
+    "graphql": "^16.9.0",
     "pdfjs-dist": "^4.8.69",
+    "pinia": "^2.2.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "vue-router": "^4.0.13",
     "vue-toastification": "^2.0.0-rc.5",
     "vuex": "^4.0.2"

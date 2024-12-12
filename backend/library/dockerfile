@@ -26,6 +26,9 @@ FROM alpine:latest
 # Instalar certificados para HTTPS
 RUN apk add --no-cache ca-certificates libc6-compat
 
+# Crear la carpeta '/imagenesPerfil' en la raíz del sistema de archivos
+RUN mkdir /imagenesPerfil
+
 # Copiar el binario desde la etapa de construcción
 COPY --from=builder /app/EduAndTime /EduAndTime
 
@@ -37,4 +40,3 @@ EXPOSE 8081
 
 # Establecer el comando por defecto
 ENTRYPOINT ["/EduAndTime"]
-

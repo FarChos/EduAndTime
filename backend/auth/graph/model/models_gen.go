@@ -2,21 +2,59 @@
 
 package model
 
+import (
+	"github.com/99designs/gqlgen/graphql"
+)
+
 type Mutation struct {
 }
 
 type Query struct {
 }
 
+type Resultado struct {
+	Exito   bool    `json:"Exito"`
+	Mensaje *string `json:"Mensaje,omitempty"`
+}
+
 type TokenAuth struct {
 	Token   *string  `json:"Token,omitempty"`
 	Usuario *Usuario `json:"Usuario,omitempty"`
 	Exito   bool     `json:"Exito"`
-	Expira  *int64   `json:"Expira,omitempty"`
 }
 
 type Usuario struct {
-	Nombre  string  `json:"Nombre"`
-	Correo  string  `json:"Correo"`
-	ImgPerf *string `json:"ImgPerf,omitempty"`
+	ID           int64   `json:"Id"`
+	Nombre       string  `json:"Nombre"`
+	Correo       string  `json:"Correo"`
+	NombreImagen *string `json:"nombreImagen,omitempty"`
+}
+
+type UsuarioInput struct {
+	Nombre     *string         `json:"Nombre,omitempty"`
+	Imagen     *graphql.Upload `json:"Imagen,omitempty"`
+	Correo     string          `json:"Correo"`
+	Contrasena string          `json:"Contrasena"`
+}
+
+type UsuarioXRecursoInput struct {
+	IdeFavorito       *int64                  `json:"ideFavorito,omitempty"`
+	IdeMiRecurso      *int64                  `json:"ideMiRecurso,omitempty"`
+	RecursoCalificado *RecursoCalificadoInput `json:"recursoCalificado,omitempty"`
+}
+
+type UsuarioXRecursos struct {
+	IdesFavoritos       []*int64             `json:"idesFavoritos,omitempty"`
+	IdesMisRecursos     []*int64             `json:"idesMisRecursos,omitempty"`
+	RecursosCalificados []*RecursoCalificado `json:"recursosCalificados,omitempty"`
+}
+
+type RecursoCalificado struct {
+	ID           int64   `json:"id"`
+	Calificacion float64 `json:"calificacion"`
+}
+
+type RecursoCalificadoInput struct {
+	IDCalificado int64   `json:"idCalificado"`
+	Calificacion float64 `json:"calificacion"`
 }

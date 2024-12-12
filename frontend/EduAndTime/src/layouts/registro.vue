@@ -1,11 +1,13 @@
 <script setup lang="ts">
+// COMPLETED
 import { ref, computed } from 'vue';
 import BotonContrasteRosa from '../components/BotonContrasteRosa.vue';
-import InputTexto from '../components/InputTexto.vue';
-import TituloEAT from '../components/TituloEAT.vue';
 import { useRouter } from 'vue-router';
 import { authInstance } from '../utils/axios';
 import { useToast } from 'vue-toastification';
+import InputTexto from '../components/InputTexto.vue';
+import TituloEAT from '../components/TituloEAT.vue';
+
 
 const router = useRouter();
 const toast = useToast();
@@ -16,45 +18,59 @@ const correo = ref('');
 const contrasena = ref('');
 const reContrasena = ref('');
 const contrasenasCoinciden = computed(() => contrasena.value === reContrasena.value);
+
 // Método para registrar el usuario
-
-
 async function registrarUsuario() {
-  if (!contrasenasCoinciden.value) {
-    toast.error('Las contraseñas deben ser iguales')
+  // Validaciones iniciales
+  if (!nombre.value.trim() || !correo.value.trim() || !contrasena.value.trim() || !reContrasena.value.trim()) {
+    toast.error('Por favor llena todos los campos.');
     return;
   }
+
+  if (!contrasenasCoinciden.value) {
+    toast.error('Las contraseñas deben ser iguales.');
+    return;
+  }
+
   try {
-    const response = await authInstance.post('/query', {
-      query: `
-        mutation {
-          crearUsuario(
-            nombre: "${nombre.value}",
-            correo: "${correo.value}",
-            contrasena: "${contrasena.value}",
-            imgPerf: null 
-          )
+    const mutation = `
+      mutation crearUsuario($input: UsuarioInput!) {
+        crearUsuario(input: $input) {
+          Exito
         }
-        `
-    });
-    console.log(response.data)
-    const exito = response.data.data.crearUsuario;
+      }
+    `;
+
+    // Construir el input dinámicamente con los datos disponibles
+    const input = {
+      Nombre: nombre.value.trim(),
+      Correo: correo.value.trim(),
+      Contrasena: contrasena.value.trim(),
+      // Eliminar Imagen si no es necesario enviar el campo
+    };
+
+    // Preparar las variables para la mutación
+    const variables = { input };
+
+    const response = await authInstance.post('/query', { mutation, variables });
+
+    // Validar respuesta
+    const exito = response?.data?.data?.crearUsuario;
 
     if (exito) {
-      console.log(Response)
-      toast.success('Registro completo')
+      toast.success('Registro completo. ¡Bienvenido!');
       router.push({ name: 'sesion' });
     } else {
-      toast.error('intentalo nuevamente')
-      console.log(Response)
+      toast.error('Inténtalo nuevamente. Ocurrió un error.');
+      console.log('Respuesta del servidor:', response);
     }
   } catch (error) {
-    toast.error('Error al registrar el usuario')
+    toast.error('Error al registrar el usuario. Por favor inténtalo más tarde.');
     console.error('Error al registrar el usuario:', error);
-    console.log(Response)
   }
 }
 </script>
+
 
 <template>
   <div class="w-full h-full bg-azulOscuroEAT md:flex md:flex-row font-gabriela">

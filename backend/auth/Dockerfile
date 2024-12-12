@@ -26,6 +26,9 @@ FROM alpine:latest
 # Instalar certificados para HTTPS
 RUN apk add --no-cache ca-certificates libc6-compat
 
+# Crear la carpeta '/recursos' en la raíz del sistema de archivos
+RUN mkdir /recursos
+
 # Copiar el binario desde la etapa de construcción
 COPY --from=builder /app/EduAndTime /EduAndTime
 

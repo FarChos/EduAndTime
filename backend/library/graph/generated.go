@@ -55,18 +55,17 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		BuscarRecursos     func(childComplexity int, input model.ParametrosBusqueda) int
-		RecursosAleatorios func(childComplexity int) int
-		TomarRecurso       func(childComplexity int, id int) int
-		UltimosRecursos    func(childComplexity int) int
+		BuscarRecursos func(childComplexity int, input model.ParametrosBusqueda) int
+		TomarRecurso   func(childComplexity int, id int) int
+		TomarRecursos  func(childComplexity int, ides []*int) int
 	}
 
 	Recurso struct {
+		Archivo      func(childComplexity int) int
 		Autor        func(childComplexity int) int
 		Calificacion func(childComplexity int) int
 		Categoria    func(childComplexity int) int
 		Descripcion  func(childComplexity int) int
-		DireccionRec func(childComplexity int) int
 		Etiquetas    func(childComplexity int) int
 		FechaOrigen  func(childComplexity int) int
 		Formato      func(childComplexity int) int
@@ -77,6 +76,7 @@ type ComplexityRoot struct {
 	}
 
 	RecursoMuestra struct {
+		Archivo      func(childComplexity int) int
 		Autor        func(childComplexity int) int
 		Calificacion func(childComplexity int) int
 		Categoria    func(childComplexity int) int
@@ -85,19 +85,23 @@ type ComplexityRoot struct {
 		ID           func(childComplexity int) int
 		Titulo       func(childComplexity int) int
 	}
+
+	Resultado struct {
+		Exito   func(childComplexity int) int
+		Mensaje func(childComplexity int) int
+	}
 }
 
 type MutationResolver interface {
-	ActualizarNumDescargas(ctx context.Context, id int) (bool, error)
-	CalificarRecurso(ctx context.Context, id int, calificacion float64) (bool, error)
-	SubirRecurso(ctx context.Context, input model.RecursoInput) (bool, error)
-	EliminarRecurso(ctx context.Context, id int) (bool, error)
+	ActualizarNumDescargas(ctx context.Context, id int) (model.Resultado, error)
+	CalificarRecurso(ctx context.Context, id int, calificacion float64) (model.Resultado, error)
+	SubirRecurso(ctx context.Context, input model.RecursoInput) (model.Resultado, error)
+	EliminarRecurso(ctx context.Context, id int) (model.Resultado, error)
 }
 type QueryResolver interface {
 	BuscarRecursos(ctx context.Context, input model.ParametrosBusqueda) ([]*model.RecursoMuestra, error)
+	TomarRecursos(ctx context.Context, ides []*int) ([]*model.RecursoMuestra, error)
 	TomarRecurso(ctx context.Context, id int) (model.Recurso, error)
-	UltimosRecursos(ctx context.Context) ([]*model.RecursoMuestra, error)
-	RecursosAleatorios(ctx context.Context) ([]*model.RecursoMuestra, error)
 }
 
 type executableSchema struct {
@@ -179,13 +183,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.BuscarRecursos(childComplexity, args["input"].(model.ParametrosBusqueda)), true
 
-	case "Query.recursosAleatorios":
-		if e.complexity.Query.RecursosAleatorios == nil {
-			break
-		}
-
-		return e.complexity.Query.RecursosAleatorios(childComplexity), true
-
 	case "Query.tomarRecurso":
 		if e.complexity.Query.TomarRecurso == nil {
 			break
@@ -198,145 +195,171 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.TomarRecurso(childComplexity, args["id"].(int)), true
 
-	case "Query.ultimosRecursos":
-		if e.complexity.Query.UltimosRecursos == nil {
+	case "Query.tomarRecursos":
+		if e.complexity.Query.TomarRecursos == nil {
 			break
 		}
 
-		return e.complexity.Query.UltimosRecursos(childComplexity), true
+		args, err := ec.field_Query_tomarRecursos_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
 
-	case "Recurso.autor":
+		return e.complexity.Query.TomarRecursos(childComplexity, args["ides"].([]*int)), true
+
+	case "Recurso.Archivo":
+		if e.complexity.Recurso.Archivo == nil {
+			break
+		}
+
+		return e.complexity.Recurso.Archivo(childComplexity), true
+
+	case "Recurso.Autor":
 		if e.complexity.Recurso.Autor == nil {
 			break
 		}
 
 		return e.complexity.Recurso.Autor(childComplexity), true
 
-	case "Recurso.calificacion":
+	case "Recurso.Calificacion":
 		if e.complexity.Recurso.Calificacion == nil {
 			break
 		}
 
 		return e.complexity.Recurso.Calificacion(childComplexity), true
 
-	case "Recurso.categoria":
+	case "Recurso.Categoria":
 		if e.complexity.Recurso.Categoria == nil {
 			break
 		}
 
 		return e.complexity.Recurso.Categoria(childComplexity), true
 
-	case "Recurso.descripcion":
+	case "Recurso.Descripcion":
 		if e.complexity.Recurso.Descripcion == nil {
 			break
 		}
 
 		return e.complexity.Recurso.Descripcion(childComplexity), true
 
-	case "Recurso.direccionRec":
-		if e.complexity.Recurso.DireccionRec == nil {
-			break
-		}
-
-		return e.complexity.Recurso.DireccionRec(childComplexity), true
-
-	case "Recurso.etiquetas":
+	case "Recurso.Etiquetas":
 		if e.complexity.Recurso.Etiquetas == nil {
 			break
 		}
 
 		return e.complexity.Recurso.Etiquetas(childComplexity), true
 
-	case "Recurso.fechaOrigen":
+	case "Recurso.FechaOrigen":
 		if e.complexity.Recurso.FechaOrigen == nil {
 			break
 		}
 
 		return e.complexity.Recurso.FechaOrigen(childComplexity), true
 
-	case "Recurso.formato":
+	case "Recurso.Formato":
 		if e.complexity.Recurso.Formato == nil {
 			break
 		}
 
 		return e.complexity.Recurso.Formato(childComplexity), true
 
-	case "Recurso.id":
+	case "Recurso.Id":
 		if e.complexity.Recurso.ID == nil {
 			break
 		}
 
 		return e.complexity.Recurso.ID(childComplexity), true
 
-	case "Recurso.idUsuario":
+	case "Recurso.IdUsuario":
 		if e.complexity.Recurso.IDUsuario == nil {
 			break
 		}
 
 		return e.complexity.Recurso.IDUsuario(childComplexity), true
 
-	case "Recurso.numDescargas":
+	case "Recurso.NumDescargas":
 		if e.complexity.Recurso.NumDescargas == nil {
 			break
 		}
 
 		return e.complexity.Recurso.NumDescargas(childComplexity), true
 
-	case "Recurso.titulo":
+	case "Recurso.Titulo":
 		if e.complexity.Recurso.Titulo == nil {
 			break
 		}
 
 		return e.complexity.Recurso.Titulo(childComplexity), true
 
-	case "RecursoMuestra.autor":
+	case "RecursoMuestra.Archivo":
+		if e.complexity.RecursoMuestra.Archivo == nil {
+			break
+		}
+
+		return e.complexity.RecursoMuestra.Archivo(childComplexity), true
+
+	case "RecursoMuestra.Autor":
 		if e.complexity.RecursoMuestra.Autor == nil {
 			break
 		}
 
 		return e.complexity.RecursoMuestra.Autor(childComplexity), true
 
-	case "RecursoMuestra.calificacion":
+	case "RecursoMuestra.Calificacion":
 		if e.complexity.RecursoMuestra.Calificacion == nil {
 			break
 		}
 
 		return e.complexity.RecursoMuestra.Calificacion(childComplexity), true
 
-	case "RecursoMuestra.categoria":
+	case "RecursoMuestra.Categoria":
 		if e.complexity.RecursoMuestra.Categoria == nil {
 			break
 		}
 
 		return e.complexity.RecursoMuestra.Categoria(childComplexity), true
 
-	case "RecursoMuestra.etiquetas":
+	case "RecursoMuestra.Etiquetas":
 		if e.complexity.RecursoMuestra.Etiquetas == nil {
 			break
 		}
 
 		return e.complexity.RecursoMuestra.Etiquetas(childComplexity), true
 
-	case "RecursoMuestra.formato":
+	case "RecursoMuestra.Formato":
 		if e.complexity.RecursoMuestra.Formato == nil {
 			break
 		}
 
 		return e.complexity.RecursoMuestra.Formato(childComplexity), true
 
-	case "RecursoMuestra.id":
+	case "RecursoMuestra.Id":
 		if e.complexity.RecursoMuestra.ID == nil {
 			break
 		}
 
 		return e.complexity.RecursoMuestra.ID(childComplexity), true
 
-	case "RecursoMuestra.titulo":
+	case "RecursoMuestra.Titulo":
 		if e.complexity.RecursoMuestra.Titulo == nil {
 			break
 		}
 
 		return e.complexity.RecursoMuestra.Titulo(childComplexity), true
+
+	case "Resultado.Exito":
+		if e.complexity.Resultado.Exito == nil {
+			break
+		}
+
+		return e.complexity.Resultado.Exito(childComplexity), true
+
+	case "Resultado.Mensaje":
+		if e.complexity.Resultado.Mensaje == nil {
+			break
+		}
+
+		return e.complexity.Resultado.Mensaje(childComplexity), true
 
 	}
 	return 0, false
@@ -643,6 +666,29 @@ func (ec *executionContext) field_Query_tomarRecurso_argsID(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Query_tomarRecursos_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_tomarRecursos_argsIdes(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["ides"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_tomarRecursos_argsIdes(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) ([]*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("ides"))
+	if tmp, ok := rawArgs["ides"]; ok {
+		return ec.unmarshalOInt2ᚕᚖint(ctx, tmp)
+	}
+
+	var zeroVal []*int
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -723,9 +769,9 @@ func (ec *executionContext) _Mutation_actualizarNumDescargas(ctx context.Context
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(model.Resultado)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNResultado2libreriaᚋgraphᚋmodelᚐResultado(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_actualizarNumDescargas(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -735,7 +781,13 @@ func (ec *executionContext) fieldContext_Mutation_actualizarNumDescargas(ctx con
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			switch field.Name {
+			case "Exito":
+				return ec.fieldContext_Resultado_Exito(ctx, field)
+			case "Mensaje":
+				return ec.fieldContext_Resultado_Mensaje(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Resultado", field.Name)
 		},
 	}
 	defer func() {
@@ -778,9 +830,9 @@ func (ec *executionContext) _Mutation_calificarRecurso(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(model.Resultado)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNResultado2libreriaᚋgraphᚋmodelᚐResultado(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_calificarRecurso(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -790,7 +842,13 @@ func (ec *executionContext) fieldContext_Mutation_calificarRecurso(ctx context.C
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			switch field.Name {
+			case "Exito":
+				return ec.fieldContext_Resultado_Exito(ctx, field)
+			case "Mensaje":
+				return ec.fieldContext_Resultado_Mensaje(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Resultado", field.Name)
 		},
 	}
 	defer func() {
@@ -833,9 +891,9 @@ func (ec *executionContext) _Mutation_subirRecurso(ctx context.Context, field gr
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(model.Resultado)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNResultado2libreriaᚋgraphᚋmodelᚐResultado(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_subirRecurso(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -845,7 +903,13 @@ func (ec *executionContext) fieldContext_Mutation_subirRecurso(ctx context.Conte
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			switch field.Name {
+			case "Exito":
+				return ec.fieldContext_Resultado_Exito(ctx, field)
+			case "Mensaje":
+				return ec.fieldContext_Resultado_Mensaje(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Resultado", field.Name)
 		},
 	}
 	defer func() {
@@ -888,9 +952,9 @@ func (ec *executionContext) _Mutation_eliminarRecurso(ctx context.Context, field
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(model.Resultado)
 	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNResultado2libreriaᚋgraphᚋmodelᚐResultado(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_eliminarRecurso(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -900,7 +964,13 @@ func (ec *executionContext) fieldContext_Mutation_eliminarRecurso(ctx context.Co
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
+			switch field.Name {
+			case "Exito":
+				return ec.fieldContext_Resultado_Exito(ctx, field)
+			case "Mensaje":
+				return ec.fieldContext_Resultado_Mensaje(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Resultado", field.Name)
 		},
 	}
 	defer func() {
@@ -953,20 +1023,22 @@ func (ec *executionContext) fieldContext_Query_buscarRecursos(ctx context.Contex
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_RecursoMuestra_id(ctx, field)
-			case "titulo":
-				return ec.fieldContext_RecursoMuestra_titulo(ctx, field)
-			case "autor":
-				return ec.fieldContext_RecursoMuestra_autor(ctx, field)
-			case "categoria":
-				return ec.fieldContext_RecursoMuestra_categoria(ctx, field)
-			case "formato":
-				return ec.fieldContext_RecursoMuestra_formato(ctx, field)
-			case "etiquetas":
-				return ec.fieldContext_RecursoMuestra_etiquetas(ctx, field)
-			case "calificacion":
-				return ec.fieldContext_RecursoMuestra_calificacion(ctx, field)
+			case "Id":
+				return ec.fieldContext_RecursoMuestra_Id(ctx, field)
+			case "Titulo":
+				return ec.fieldContext_RecursoMuestra_Titulo(ctx, field)
+			case "Autor":
+				return ec.fieldContext_RecursoMuestra_Autor(ctx, field)
+			case "Categoria":
+				return ec.fieldContext_RecursoMuestra_Categoria(ctx, field)
+			case "Formato":
+				return ec.fieldContext_RecursoMuestra_Formato(ctx, field)
+			case "Archivo":
+				return ec.fieldContext_RecursoMuestra_Archivo(ctx, field)
+			case "Etiquetas":
+				return ec.fieldContext_RecursoMuestra_Etiquetas(ctx, field)
+			case "Calificacion":
+				return ec.fieldContext_RecursoMuestra_Calificacion(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type RecursoMuestra", field.Name)
 		},
@@ -979,6 +1051,76 @@ func (ec *executionContext) fieldContext_Query_buscarRecursos(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_buscarRecursos_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_tomarRecursos(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_tomarRecursos(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().TomarRecursos(rctx, fc.Args["ides"].([]*int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*model.RecursoMuestra)
+	fc.Result = res
+	return ec.marshalORecursoMuestra2ᚕᚖlibreriaᚋgraphᚋmodelᚐRecursoMuestra(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_tomarRecursos(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "Id":
+				return ec.fieldContext_RecursoMuestra_Id(ctx, field)
+			case "Titulo":
+				return ec.fieldContext_RecursoMuestra_Titulo(ctx, field)
+			case "Autor":
+				return ec.fieldContext_RecursoMuestra_Autor(ctx, field)
+			case "Categoria":
+				return ec.fieldContext_RecursoMuestra_Categoria(ctx, field)
+			case "Formato":
+				return ec.fieldContext_RecursoMuestra_Formato(ctx, field)
+			case "Archivo":
+				return ec.fieldContext_RecursoMuestra_Archivo(ctx, field)
+			case "Etiquetas":
+				return ec.fieldContext_RecursoMuestra_Etiquetas(ctx, field)
+			case "Calificacion":
+				return ec.fieldContext_RecursoMuestra_Calificacion(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RecursoMuestra", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_tomarRecursos_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -1024,30 +1166,30 @@ func (ec *executionContext) fieldContext_Query_tomarRecurso(ctx context.Context,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "id":
-				return ec.fieldContext_Recurso_id(ctx, field)
-			case "titulo":
-				return ec.fieldContext_Recurso_titulo(ctx, field)
-			case "autor":
-				return ec.fieldContext_Recurso_autor(ctx, field)
-			case "categoria":
-				return ec.fieldContext_Recurso_categoria(ctx, field)
-			case "idUsuario":
-				return ec.fieldContext_Recurso_idUsuario(ctx, field)
-			case "formato":
-				return ec.fieldContext_Recurso_formato(ctx, field)
-			case "descripcion":
-				return ec.fieldContext_Recurso_descripcion(ctx, field)
-			case "direccionRec":
-				return ec.fieldContext_Recurso_direccionRec(ctx, field)
-			case "fechaOrigen":
-				return ec.fieldContext_Recurso_fechaOrigen(ctx, field)
-			case "etiquetas":
-				return ec.fieldContext_Recurso_etiquetas(ctx, field)
-			case "calificacion":
-				return ec.fieldContext_Recurso_calificacion(ctx, field)
-			case "numDescargas":
-				return ec.fieldContext_Recurso_numDescargas(ctx, field)
+			case "Id":
+				return ec.fieldContext_Recurso_Id(ctx, field)
+			case "Titulo":
+				return ec.fieldContext_Recurso_Titulo(ctx, field)
+			case "Autor":
+				return ec.fieldContext_Recurso_Autor(ctx, field)
+			case "Categoria":
+				return ec.fieldContext_Recurso_Categoria(ctx, field)
+			case "IdUsuario":
+				return ec.fieldContext_Recurso_IdUsuario(ctx, field)
+			case "Formato":
+				return ec.fieldContext_Recurso_Formato(ctx, field)
+			case "Descripcion":
+				return ec.fieldContext_Recurso_Descripcion(ctx, field)
+			case "Archivo":
+				return ec.fieldContext_Recurso_Archivo(ctx, field)
+			case "FechaOrigen":
+				return ec.fieldContext_Recurso_FechaOrigen(ctx, field)
+			case "Etiquetas":
+				return ec.fieldContext_Recurso_Etiquetas(ctx, field)
+			case "Calificacion":
+				return ec.fieldContext_Recurso_Calificacion(ctx, field)
+			case "NumDescargas":
+				return ec.fieldContext_Recurso_NumDescargas(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Recurso", field.Name)
 		},
@@ -1062,120 +1204,6 @@ func (ec *executionContext) fieldContext_Query_tomarRecurso(ctx context.Context,
 	if fc.Args, err = ec.field_Query_tomarRecurso_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_ultimosRecursos(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_ultimosRecursos(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().UltimosRecursos(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.RecursoMuestra)
-	fc.Result = res
-	return ec.marshalORecursoMuestra2ᚕᚖlibreriaᚋgraphᚋmodelᚐRecursoMuestra(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_ultimosRecursos(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_RecursoMuestra_id(ctx, field)
-			case "titulo":
-				return ec.fieldContext_RecursoMuestra_titulo(ctx, field)
-			case "autor":
-				return ec.fieldContext_RecursoMuestra_autor(ctx, field)
-			case "categoria":
-				return ec.fieldContext_RecursoMuestra_categoria(ctx, field)
-			case "formato":
-				return ec.fieldContext_RecursoMuestra_formato(ctx, field)
-			case "etiquetas":
-				return ec.fieldContext_RecursoMuestra_etiquetas(ctx, field)
-			case "calificacion":
-				return ec.fieldContext_RecursoMuestra_calificacion(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type RecursoMuestra", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_recursosAleatorios(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_recursosAleatorios(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().RecursosAleatorios(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*model.RecursoMuestra)
-	fc.Result = res
-	return ec.marshalORecursoMuestra2ᚕᚖlibreriaᚋgraphᚋmodelᚐRecursoMuestra(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_recursosAleatorios(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_RecursoMuestra_id(ctx, field)
-			case "titulo":
-				return ec.fieldContext_RecursoMuestra_titulo(ctx, field)
-			case "autor":
-				return ec.fieldContext_RecursoMuestra_autor(ctx, field)
-			case "categoria":
-				return ec.fieldContext_RecursoMuestra_categoria(ctx, field)
-			case "formato":
-				return ec.fieldContext_RecursoMuestra_formato(ctx, field)
-			case "etiquetas":
-				return ec.fieldContext_RecursoMuestra_etiquetas(ctx, field)
-			case "calificacion":
-				return ec.fieldContext_RecursoMuestra_calificacion(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type RecursoMuestra", field.Name)
-		},
 	}
 	return fc, nil
 }
@@ -1309,8 +1337,8 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Recurso_id(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Recurso_id(ctx, field)
+func (ec *executionContext) _Recurso_Id(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Recurso_Id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1340,7 +1368,7 @@ func (ec *executionContext) _Recurso_id(ctx context.Context, field graphql.Colle
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Recurso_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Recurso_Id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Recurso",
 		Field:      field,
@@ -1353,8 +1381,8 @@ func (ec *executionContext) fieldContext_Recurso_id(_ context.Context, field gra
 	return fc, nil
 }
 
-func (ec *executionContext) _Recurso_titulo(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Recurso_titulo(ctx, field)
+func (ec *executionContext) _Recurso_Titulo(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Recurso_Titulo(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1384,7 +1412,7 @@ func (ec *executionContext) _Recurso_titulo(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Recurso_titulo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Recurso_Titulo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Recurso",
 		Field:      field,
@@ -1397,8 +1425,8 @@ func (ec *executionContext) fieldContext_Recurso_titulo(_ context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Recurso_autor(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Recurso_autor(ctx, field)
+func (ec *executionContext) _Recurso_Autor(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Recurso_Autor(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1428,7 +1456,7 @@ func (ec *executionContext) _Recurso_autor(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Recurso_autor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Recurso_Autor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Recurso",
 		Field:      field,
@@ -1441,8 +1469,8 @@ func (ec *executionContext) fieldContext_Recurso_autor(_ context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _Recurso_categoria(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Recurso_categoria(ctx, field)
+func (ec *executionContext) _Recurso_Categoria(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Recurso_Categoria(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1472,7 +1500,7 @@ func (ec *executionContext) _Recurso_categoria(ctx context.Context, field graphq
 	return ec.marshalNCategoria2libreriaᚋgraphᚋmodelᚐCategoria(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Recurso_categoria(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Recurso_Categoria(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Recurso",
 		Field:      field,
@@ -1485,8 +1513,8 @@ func (ec *executionContext) fieldContext_Recurso_categoria(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Recurso_idUsuario(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Recurso_idUsuario(ctx, field)
+func (ec *executionContext) _Recurso_IdUsuario(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Recurso_IdUsuario(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1516,7 +1544,7 @@ func (ec *executionContext) _Recurso_idUsuario(ctx context.Context, field graphq
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Recurso_idUsuario(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Recurso_IdUsuario(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Recurso",
 		Field:      field,
@@ -1529,8 +1557,8 @@ func (ec *executionContext) fieldContext_Recurso_idUsuario(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Recurso_formato(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Recurso_formato(ctx, field)
+func (ec *executionContext) _Recurso_Formato(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Recurso_Formato(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1560,7 +1588,7 @@ func (ec *executionContext) _Recurso_formato(ctx context.Context, field graphql.
 	return ec.marshalNFormato2libreriaᚋgraphᚋmodelᚐFormato(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Recurso_formato(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Recurso_Formato(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Recurso",
 		Field:      field,
@@ -1573,8 +1601,8 @@ func (ec *executionContext) fieldContext_Recurso_formato(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Recurso_descripcion(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Recurso_descripcion(ctx, field)
+func (ec *executionContext) _Recurso_Descripcion(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Recurso_Descripcion(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1604,7 +1632,7 @@ func (ec *executionContext) _Recurso_descripcion(ctx context.Context, field grap
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Recurso_descripcion(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Recurso_Descripcion(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Recurso",
 		Field:      field,
@@ -1617,8 +1645,8 @@ func (ec *executionContext) fieldContext_Recurso_descripcion(_ context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _Recurso_direccionRec(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Recurso_direccionRec(ctx, field)
+func (ec *executionContext) _Recurso_Archivo(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Recurso_Archivo(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1631,7 +1659,7 @@ func (ec *executionContext) _Recurso_direccionRec(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.DireccionRec, nil
+		return obj.Archivo, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1648,7 +1676,7 @@ func (ec *executionContext) _Recurso_direccionRec(ctx context.Context, field gra
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Recurso_direccionRec(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Recurso_Archivo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Recurso",
 		Field:      field,
@@ -1661,8 +1689,8 @@ func (ec *executionContext) fieldContext_Recurso_direccionRec(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _Recurso_fechaOrigen(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Recurso_fechaOrigen(ctx, field)
+func (ec *executionContext) _Recurso_FechaOrigen(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Recurso_FechaOrigen(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1692,7 +1720,7 @@ func (ec *executionContext) _Recurso_fechaOrigen(ctx context.Context, field grap
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Recurso_fechaOrigen(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Recurso_FechaOrigen(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Recurso",
 		Field:      field,
@@ -1705,8 +1733,8 @@ func (ec *executionContext) fieldContext_Recurso_fechaOrigen(_ context.Context, 
 	return fc, nil
 }
 
-func (ec *executionContext) _Recurso_etiquetas(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Recurso_etiquetas(ctx, field)
+func (ec *executionContext) _Recurso_Etiquetas(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Recurso_Etiquetas(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1733,7 +1761,7 @@ func (ec *executionContext) _Recurso_etiquetas(ctx context.Context, field graphq
 	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Recurso_etiquetas(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Recurso_Etiquetas(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Recurso",
 		Field:      field,
@@ -1746,8 +1774,8 @@ func (ec *executionContext) fieldContext_Recurso_etiquetas(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Recurso_calificacion(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Recurso_calificacion(ctx, field)
+func (ec *executionContext) _Recurso_Calificacion(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Recurso_Calificacion(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1774,7 +1802,7 @@ func (ec *executionContext) _Recurso_calificacion(ctx context.Context, field gra
 	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Recurso_calificacion(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Recurso_Calificacion(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Recurso",
 		Field:      field,
@@ -1787,8 +1815,8 @@ func (ec *executionContext) fieldContext_Recurso_calificacion(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _Recurso_numDescargas(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Recurso_numDescargas(ctx, field)
+func (ec *executionContext) _Recurso_NumDescargas(ctx context.Context, field graphql.CollectedField, obj *model.Recurso) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Recurso_NumDescargas(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1815,7 +1843,7 @@ func (ec *executionContext) _Recurso_numDescargas(ctx context.Context, field gra
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Recurso_numDescargas(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Recurso_NumDescargas(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Recurso",
 		Field:      field,
@@ -1828,8 +1856,8 @@ func (ec *executionContext) fieldContext_Recurso_numDescargas(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _RecursoMuestra_id(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_RecursoMuestra_id(ctx, field)
+func (ec *executionContext) _RecursoMuestra_Id(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RecursoMuestra_Id(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1859,7 +1887,7 @@ func (ec *executionContext) _RecursoMuestra_id(ctx context.Context, field graphq
 	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_RecursoMuestra_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_RecursoMuestra_Id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "RecursoMuestra",
 		Field:      field,
@@ -1872,8 +1900,8 @@ func (ec *executionContext) fieldContext_RecursoMuestra_id(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _RecursoMuestra_titulo(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_RecursoMuestra_titulo(ctx, field)
+func (ec *executionContext) _RecursoMuestra_Titulo(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RecursoMuestra_Titulo(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1903,7 +1931,7 @@ func (ec *executionContext) _RecursoMuestra_titulo(ctx context.Context, field gr
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_RecursoMuestra_titulo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_RecursoMuestra_Titulo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "RecursoMuestra",
 		Field:      field,
@@ -1916,8 +1944,8 @@ func (ec *executionContext) fieldContext_RecursoMuestra_titulo(_ context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _RecursoMuestra_autor(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_RecursoMuestra_autor(ctx, field)
+func (ec *executionContext) _RecursoMuestra_Autor(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RecursoMuestra_Autor(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1947,7 +1975,7 @@ func (ec *executionContext) _RecursoMuestra_autor(ctx context.Context, field gra
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_RecursoMuestra_autor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_RecursoMuestra_Autor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "RecursoMuestra",
 		Field:      field,
@@ -1960,8 +1988,8 @@ func (ec *executionContext) fieldContext_RecursoMuestra_autor(_ context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _RecursoMuestra_categoria(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_RecursoMuestra_categoria(ctx, field)
+func (ec *executionContext) _RecursoMuestra_Categoria(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RecursoMuestra_Categoria(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1991,7 +2019,7 @@ func (ec *executionContext) _RecursoMuestra_categoria(ctx context.Context, field
 	return ec.marshalNCategoria2libreriaᚋgraphᚋmodelᚐCategoria(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_RecursoMuestra_categoria(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_RecursoMuestra_Categoria(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "RecursoMuestra",
 		Field:      field,
@@ -2004,8 +2032,8 @@ func (ec *executionContext) fieldContext_RecursoMuestra_categoria(_ context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _RecursoMuestra_formato(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_RecursoMuestra_formato(ctx, field)
+func (ec *executionContext) _RecursoMuestra_Formato(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RecursoMuestra_Formato(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2035,7 +2063,7 @@ func (ec *executionContext) _RecursoMuestra_formato(ctx context.Context, field g
 	return ec.marshalNFormato2libreriaᚋgraphᚋmodelᚐFormato(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_RecursoMuestra_formato(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_RecursoMuestra_Formato(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "RecursoMuestra",
 		Field:      field,
@@ -2048,8 +2076,52 @@ func (ec *executionContext) fieldContext_RecursoMuestra_formato(_ context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _RecursoMuestra_etiquetas(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_RecursoMuestra_etiquetas(ctx, field)
+func (ec *executionContext) _RecursoMuestra_Archivo(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RecursoMuestra_Archivo(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Archivo, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RecursoMuestra_Archivo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RecursoMuestra",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RecursoMuestra_Etiquetas(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RecursoMuestra_Etiquetas(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2076,7 +2148,7 @@ func (ec *executionContext) _RecursoMuestra_etiquetas(ctx context.Context, field
 	return ec.marshalOString2ᚕᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_RecursoMuestra_etiquetas(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_RecursoMuestra_Etiquetas(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "RecursoMuestra",
 		Field:      field,
@@ -2089,8 +2161,8 @@ func (ec *executionContext) fieldContext_RecursoMuestra_etiquetas(_ context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _RecursoMuestra_calificacion(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_RecursoMuestra_calificacion(ctx, field)
+func (ec *executionContext) _RecursoMuestra_Calificacion(ctx context.Context, field graphql.CollectedField, obj *model.RecursoMuestra) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RecursoMuestra_Calificacion(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -2117,7 +2189,7 @@ func (ec *executionContext) _RecursoMuestra_calificacion(ctx context.Context, fi
 	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_RecursoMuestra_calificacion(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_RecursoMuestra_Calificacion(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "RecursoMuestra",
 		Field:      field,
@@ -2125,6 +2197,91 @@ func (ec *executionContext) fieldContext_RecursoMuestra_calificacion(_ context.C
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Resultado_Exito(ctx context.Context, field graphql.CollectedField, obj *model.Resultado) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Resultado_Exito(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Exito, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Resultado_Exito(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Resultado",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Resultado_Mensaje(ctx context.Context, field graphql.CollectedField, obj *model.Resultado) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Resultado_Mensaje(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Mensaje, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Resultado_Mensaje(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Resultado",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3910,48 +4067,55 @@ func (ec *executionContext) unmarshalInputParametrosBusqueda(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"titulo", "autor", "categoria", "formato", "etiquetas"}
+	fieldsInOrder := [...]string{"Titulo", "Autor", "Categoria", "Formato", "Etiquetas", "Cantidad"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "titulo":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("titulo"))
+		case "Titulo":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Titulo"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Titulo = data
-		case "autor":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("autor"))
+		case "Autor":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Autor"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Autor = data
-		case "categoria":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("categoria"))
+		case "Categoria":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Categoria"))
 			data, err := ec.unmarshalOCategoria2ᚖlibreriaᚋgraphᚋmodelᚐCategoria(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Categoria = data
-		case "formato":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formato"))
+		case "Formato":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Formato"))
 			data, err := ec.unmarshalOFormato2ᚖlibreriaᚋgraphᚋmodelᚐFormato(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Formato = data
-		case "etiquetas":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("etiquetas"))
+		case "Etiquetas":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Etiquetas"))
 			data, err := ec.unmarshalOString2ᚕᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Etiquetas = data
+		case "Cantidad":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Cantidad"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Cantidad = data
 		}
 	}
 
@@ -3965,64 +4129,64 @@ func (ec *executionContext) unmarshalInputRecursoInput(ctx context.Context, obj 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"titulo", "autor", "categoria", "idUsuario", "formato", "descripcion", "direccionRec", "etiquetas"}
+	fieldsInOrder := [...]string{"Titulo", "Autor", "Categoria", "IdUsuario", "Formato", "Descripcion", "Recurso", "Etiquetas"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "titulo":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("titulo"))
+		case "Titulo":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Titulo"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Titulo = data
-		case "autor":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("autor"))
+		case "Autor":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Autor"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Autor = data
-		case "categoria":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("categoria"))
+		case "Categoria":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Categoria"))
 			data, err := ec.unmarshalNCategoria2libreriaᚋgraphᚋmodelᚐCategoria(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Categoria = data
-		case "idUsuario":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idUsuario"))
+		case "IdUsuario":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("IdUsuario"))
 			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.IDUsuario = data
-		case "formato":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("formato"))
+		case "Formato":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Formato"))
 			data, err := ec.unmarshalNFormato2libreriaᚋgraphᚋmodelᚐFormato(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Formato = data
-		case "descripcion":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("descripcion"))
+		case "Descripcion":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Descripcion"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
 			it.Descripcion = data
-		case "direccionRec":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("direccionRec"))
-			data, err := ec.unmarshalNString2string(ctx, v)
+		case "Recurso":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Recurso"))
+			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.DireccionRec = data
-		case "etiquetas":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("etiquetas"))
+			it.Recurso = data
+		case "Etiquetas":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Etiquetas"))
 			data, err := ec.unmarshalOString2ᚕᚖstring(ctx, v)
 			if err != nil {
 				return it, err
@@ -4150,6 +4314,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "tomarRecursos":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_tomarRecursos(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "tomarRecurso":
 			field := field
 
@@ -4163,44 +4346,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "ultimosRecursos":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_ultimosRecursos(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "recursosAleatorios":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_recursosAleatorios(ctx, field)
 				return res
 			}
 
@@ -4252,57 +4397,57 @@ func (ec *executionContext) _Recurso(ctx context.Context, sel ast.SelectionSet, 
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Recurso")
-		case "id":
-			out.Values[i] = ec._Recurso_id(ctx, field, obj)
+		case "Id":
+			out.Values[i] = ec._Recurso_Id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "titulo":
-			out.Values[i] = ec._Recurso_titulo(ctx, field, obj)
+		case "Titulo":
+			out.Values[i] = ec._Recurso_Titulo(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "autor":
-			out.Values[i] = ec._Recurso_autor(ctx, field, obj)
+		case "Autor":
+			out.Values[i] = ec._Recurso_Autor(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "categoria":
-			out.Values[i] = ec._Recurso_categoria(ctx, field, obj)
+		case "Categoria":
+			out.Values[i] = ec._Recurso_Categoria(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "idUsuario":
-			out.Values[i] = ec._Recurso_idUsuario(ctx, field, obj)
+		case "IdUsuario":
+			out.Values[i] = ec._Recurso_IdUsuario(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "formato":
-			out.Values[i] = ec._Recurso_formato(ctx, field, obj)
+		case "Formato":
+			out.Values[i] = ec._Recurso_Formato(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "descripcion":
-			out.Values[i] = ec._Recurso_descripcion(ctx, field, obj)
+		case "Descripcion":
+			out.Values[i] = ec._Recurso_Descripcion(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "direccionRec":
-			out.Values[i] = ec._Recurso_direccionRec(ctx, field, obj)
+		case "Archivo":
+			out.Values[i] = ec._Recurso_Archivo(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "fechaOrigen":
-			out.Values[i] = ec._Recurso_fechaOrigen(ctx, field, obj)
+		case "FechaOrigen":
+			out.Values[i] = ec._Recurso_FechaOrigen(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "etiquetas":
-			out.Values[i] = ec._Recurso_etiquetas(ctx, field, obj)
-		case "calificacion":
-			out.Values[i] = ec._Recurso_calificacion(ctx, field, obj)
-		case "numDescargas":
-			out.Values[i] = ec._Recurso_numDescargas(ctx, field, obj)
+		case "Etiquetas":
+			out.Values[i] = ec._Recurso_Etiquetas(ctx, field, obj)
+		case "Calificacion":
+			out.Values[i] = ec._Recurso_Calificacion(ctx, field, obj)
+		case "NumDescargas":
+			out.Values[i] = ec._Recurso_NumDescargas(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4337,35 +4482,81 @@ func (ec *executionContext) _RecursoMuestra(ctx context.Context, sel ast.Selecti
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("RecursoMuestra")
-		case "id":
-			out.Values[i] = ec._RecursoMuestra_id(ctx, field, obj)
+		case "Id":
+			out.Values[i] = ec._RecursoMuestra_Id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "titulo":
-			out.Values[i] = ec._RecursoMuestra_titulo(ctx, field, obj)
+		case "Titulo":
+			out.Values[i] = ec._RecursoMuestra_Titulo(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "autor":
-			out.Values[i] = ec._RecursoMuestra_autor(ctx, field, obj)
+		case "Autor":
+			out.Values[i] = ec._RecursoMuestra_Autor(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "categoria":
-			out.Values[i] = ec._RecursoMuestra_categoria(ctx, field, obj)
+		case "Categoria":
+			out.Values[i] = ec._RecursoMuestra_Categoria(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "formato":
-			out.Values[i] = ec._RecursoMuestra_formato(ctx, field, obj)
+		case "Formato":
+			out.Values[i] = ec._RecursoMuestra_Formato(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "etiquetas":
-			out.Values[i] = ec._RecursoMuestra_etiquetas(ctx, field, obj)
-		case "calificacion":
-			out.Values[i] = ec._RecursoMuestra_calificacion(ctx, field, obj)
+		case "Archivo":
+			out.Values[i] = ec._RecursoMuestra_Archivo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Etiquetas":
+			out.Values[i] = ec._RecursoMuestra_Etiquetas(ctx, field, obj)
+		case "Calificacion":
+			out.Values[i] = ec._RecursoMuestra_Calificacion(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var resultadoImplementors = []string{"Resultado"}
+
+func (ec *executionContext) _Resultado(ctx context.Context, sel ast.SelectionSet, obj *model.Resultado) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, resultadoImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Resultado")
+		case "Exito":
+			out.Values[i] = ec._Resultado_Exito(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "Mensaje":
+			out.Values[i] = ec._Resultado_Mensaje(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4794,6 +4985,10 @@ func (ec *executionContext) unmarshalNRecursoInput2libreriaᚋgraphᚋmodelᚐRe
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) marshalNResultado2libreriaᚋgraphᚋmodelᚐResultado(ctx context.Context, sel ast.SelectionSet, v model.Resultado) graphql.Marshaler {
+	return ec._Resultado(ctx, sel, &v)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4801,6 +4996,21 @@ func (ec *executionContext) unmarshalNString2string(ctx context.Context, v inter
 
 func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	res := graphql.MarshalString(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v interface{}) (graphql.Upload, error) {
+	res, err := graphql.UnmarshalUpload(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, sel ast.SelectionSet, v graphql.Upload) graphql.Marshaler {
+	res := graphql.MarshalUpload(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -5134,6 +5344,38 @@ func (ec *executionContext) marshalOFormato2ᚖlibreriaᚋgraphᚋmodelᚐFormat
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) unmarshalOInt2ᚕᚖint(ctx context.Context, v interface{}) ([]*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*int, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOInt2ᚖint(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOInt2ᚕᚖint(ctx context.Context, sel ast.SelectionSet, v []*int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOInt2ᚖint(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {

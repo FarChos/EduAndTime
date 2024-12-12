@@ -6,61 +6,71 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type Mutation struct {
 }
 
 type ParametrosBusqueda struct {
-	Titulo    *string    `json:"titulo,omitempty"`
-	Autor     *string    `json:"autor,omitempty"`
-	Categoria *Categoria `json:"categoria,omitempty"`
-	Formato   *Formato   `json:"formato,omitempty"`
-	Etiquetas []*string  `json:"etiquetas,omitempty"`
+	Titulo    *string    `json:"Titulo,omitempty"`
+	Autor     *string    `json:"Autor,omitempty"`
+	Categoria *Categoria `json:"Categoria,omitempty"`
+	Formato   *Formato   `json:"Formato,omitempty"`
+	Etiquetas []*string  `json:"Etiquetas,omitempty"`
+	Cantidad  *int       `json:"Cantidad,omitempty"`
 }
 
 type Query struct {
 }
 
 type Recurso struct {
-	ID           int       `json:"id"`
-	Titulo       string    `json:"titulo"`
-	Autor        string    `json:"autor"`
-	Categoria    Categoria `json:"categoria"`
-	IDUsuario    int       `json:"idUsuario"`
-	Formato      Formato   `json:"formato"`
-	Descripcion  string    `json:"descripcion"`
-	DireccionRec string    `json:"direccionRec"`
-	FechaOrigen  string    `json:"fechaOrigen"`
-	Etiquetas    []*string `json:"etiquetas,omitempty"`
-	Calificacion *float64  `json:"calificacion,omitempty"`
-	NumDescargas *int      `json:"numDescargas,omitempty"`
+	ID           int       `json:"Id"`
+	Titulo       string    `json:"Titulo"`
+	Autor        string    `json:"Autor"`
+	Categoria    Categoria `json:"Categoria"`
+	IDUsuario    int       `json:"IdUsuario"`
+	Formato      Formato   `json:"Formato"`
+	Descripcion  string    `json:"Descripcion"`
+	Archivo      string    `json:"Archivo"`
+	FechaOrigen  string    `json:"FechaOrigen"`
+	Etiquetas    []*string `json:"Etiquetas,omitempty"`
+	Calificacion *float64  `json:"Calificacion,omitempty"`
+	NumDescargas *int      `json:"NumDescargas,omitempty"`
 }
 
 type RecursoInput struct {
-	Titulo       string    `json:"titulo"`
-	Autor        string    `json:"autor"`
-	Categoria    Categoria `json:"categoria"`
-	IDUsuario    int       `json:"idUsuario"`
-	Formato      Formato   `json:"formato"`
-	Descripcion  string    `json:"descripcion"`
-	DireccionRec string    `json:"direccionRec"`
-	Etiquetas    []*string `json:"etiquetas,omitempty"`
+	Titulo      string         `json:"Titulo"`
+	Autor       string         `json:"Autor"`
+	Categoria   Categoria      `json:"Categoria"`
+	IDUsuario   int            `json:"IdUsuario"`
+	Formato     Formato        `json:"Formato"`
+	Descripcion string         `json:"Descripcion"`
+	Recurso     graphql.Upload `json:"Recurso"`
+	Etiquetas   []*string      `json:"Etiquetas,omitempty"`
 }
 
 type RecursoMuestra struct {
-	ID           int       `json:"id"`
-	Titulo       string    `json:"titulo"`
-	Autor        string    `json:"autor"`
-	Categoria    Categoria `json:"categoria"`
-	Formato      Formato   `json:"formato"`
-	Etiquetas    []*string `json:"etiquetas,omitempty"`
-	Calificacion *float64  `json:"calificacion,omitempty"`
+	ID           int       `json:"Id"`
+	Titulo       string    `json:"Titulo"`
+	Autor        string    `json:"Autor"`
+	Categoria    Categoria `json:"Categoria"`
+	Formato      Formato   `json:"Formato"`
+	Archivo      string    `json:"Archivo"`
+	Etiquetas    []*string `json:"Etiquetas,omitempty"`
+	Calificacion *float64  `json:"Calificacion,omitempty"`
+}
+
+type Resultado struct {
+	Exito   bool    `json:"Exito"`
+	Mensaje *string `json:"Mensaje,omitempty"`
 }
 
 type Categoria string
 
 const (
+	CategoriaGeneral    Categoria = "general"
 	CategoriaSociedad   Categoria = "sociedad"
 	CategoriaGeografia  Categoria = "geografia"
 	CategoriaTecnologia Categoria = "tecnologia"
@@ -74,6 +84,7 @@ const (
 )
 
 var AllCategoria = []Categoria{
+	CategoriaGeneral,
 	CategoriaSociedad,
 	CategoriaGeografia,
 	CategoriaTecnologia,
@@ -88,7 +99,7 @@ var AllCategoria = []Categoria{
 
 func (e Categoria) IsValid() bool {
 	switch e {
-	case CategoriaSociedad, CategoriaGeografia, CategoriaTecnologia, CategoriaCiencia, CategoriaEconomia, CategoriaBienestar, CategoriaPolitica, CategoriaArte, CategoriaFilosofia, CategoriaExotica:
+	case CategoriaGeneral, CategoriaSociedad, CategoriaGeografia, CategoriaTecnologia, CategoriaCiencia, CategoriaEconomia, CategoriaBienestar, CategoriaPolitica, CategoriaArte, CategoriaFilosofia, CategoriaExotica:
 		return true
 	}
 	return false
